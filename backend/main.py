@@ -14,7 +14,7 @@ from .models import (
 from .ai_engine import phishing_engine, anomaly_engine
 
 app = FastAPI(title="CyberGuard AI API")
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter()
 
 # Enable CORS for frontend
 app.add_middleware(
@@ -160,6 +160,8 @@ def health_check():
     return {"status": "healthy", "timestamp": datetime.datetime.utcnow()}
 
 # Include the router in the app
+app.include_router(api_router, prefix="/api")
+# Fallback: Include router at root in case Vercel strips the prefix
 app.include_router(api_router)
 
 if __name__ == "__main__":
