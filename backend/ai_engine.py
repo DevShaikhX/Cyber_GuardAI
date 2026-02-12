@@ -1,25 +1,41 @@
 import random
 import re
 from typing import List, Tuple
-try:
-    from transformers import pipeline
-except ImportError:
-    pipeline = None
-import pandas as pd
-from sklearn.ensemble import IsolationForest
-import numpy as np
+
+# Lazy loading placeholders
+pipeline = None
+IsolationForest = None
+np = None
 
 class PhishingDetector:
     def __init__(self):
-        # Using a general sentiment model as a placeholder for a specific phishing transformer
-        # In a real scenario, we would use 'mrm8488/bert-tiny-finetuned-phishing-emails' or similar
+        self._classifier = None
+        self._initialized = False
+
+    def _ensure_initialized(self):
+        if self._initialized:
+            return
+        
+        global pipeline
         try:
-            self.classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
-        except:
-            self.classifier = None
-            print("Warning: Could not load transformer model. Using heuristic fallback.")
+            if pipeline is None:
+                from transformers import pipeline
+        except ImportError:
+            pipeline = None
+            print("Warning: Could not import transformers.")
+
+        if pipeline:
+            try:
+                self._classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
+            except Exception as e:
+                print(f"Warning: Could not load transformer model: {e}")
+                self._classifier = None
+        
+        self._initialized = True
 
     def analyze(self, body: str, urls: List[str], sender: str, subject: str) -> Tuple[float, List[str], str]:
+        self._ensure_initialized()
+        
         flagged = []
         score = 0.0
         
@@ -39,10 +55,10 @@ class PhishingDetector:
             score += 40
 
         # 3. Content Analysis (Transformer or Heuristic)
-        if self.classifier:
+        if self._classifier:
             try:
                 # Truncate to avoid model limit
-                result = self.classifier(body[:512])[0]
+                result = self._classifier(body[:512])[0]
                 # If negative sentiment + urgent keywords, it's a signal
                 if result['label'] == 'NEGATIVE' and result['score'] > 0.8:
                     score += 30
@@ -69,27 +85,68 @@ class PhishingDetector:
 
 class AnomalyDetector:
     def __init__(self):
-        self.model = IsolationForest(contamination=0.1, random_state=42)
-        # Pre-train with some dummy data to avoid errors if first call is too small
-        dummy_data = np.random.rand(10, 4) # source_port, dest_port, packet_count, protocol_encoded
-        self.model.fit(dummy_data)
+        self._model = None
+        self._initialized = False
+
+    def _ensure_initialized(self):
+        if self._initialized:
+            return
+
+        global IsolationForest, np
+        try:
+            if np is None:
+                import numpy as np
+            if IsolationForest is None:
+                from sklearn.ensemble import IsolationForest
+                
+            # Initialize model
+            self._model = IsolationForest(contamination=0.1, random_state=42)
+            # Pre-train with some dummy data to avoid errors if first call is too small
+            dummy_data = np.random.rand(10, 4) # source_port, dest_port, packet_count, protocol_encoded
+            self._model.fit(dummy_data)
+        except ImportError as e:
+            print(f"Warning: Could not import ML libraries for AnomalyDetector: {e}")
+            self._model = None
+        except Exception as e:
+            print(f"Warning: Could not initialize AnomalyDetector model: {e}")
+            self._model = None
+            
+        self._initialized = True
 
     def analyze(self, source_port: int, dest_port: int, packet_count: int, protocol: str) -> Tuple[float, str, str]:
+        self._ensure_initialized()
+        
         # Simple encoding for protocol
         proto_map = {"TCP": 1, "UDP": 2, "ICMP": 3, "HTTP": 4, "HTTPS": 5}
         proto_val = proto_map.get(protocol.upper(), 0)
 
-        # Features for detection
-        features = np.array([[source_port, dest_port, packet_count, proto_val]])
+        anomaly_score = 0.0
         
-        # Isolation Forest returns -1 for anomalies
-        prediction = self.model.decision_function(features)[0]
+        if self._model and np:
+            try:
+                # Features for detection
+                features = np.array([[source_port, dest_port, packet_count, proto_val]])
+                
+                # Isolation Forest returns -1 for anomalies
+                prediction = self._model.decision_function(features)[0]
+                
+                # Normalize prediction to 0-100 score
+                # decision_function output is roughly [-0.5, 0.5]
+                # We want higher score for higher anomaly
+                anomaly_score = (1 - (prediction + 0.5)) * 100
+                anomaly_score = max(0, min(100, anomaly_score))
+            except Exception as e:
+                print(f"Error during anomaly detection: {e}")
+                # Fallbck logic below
+                pass
         
-        # Normalize prediction to 0-100 score
-        # decision_function output is roughly [-0.5, 0.5]
-        # We want higher score for higher anomaly
-        anomaly_score = (1 - (prediction + 0.5)) * 100
-        anomaly_score = max(0, min(100, anomaly_score))
+        # Fallback heuristic if model failed or not loaded
+        if anomaly_score == 0.0:
+             if packet_count > 1000:
+                 anomaly_score = 75.0
+             elif dest_port == 23 or dest_port == 22: # Telnet/SSH brute force check basic
+                 if packet_count > 100:
+                    anomaly_score = 60.0
 
         risk_level = "low"
         description = "Network activity appears normal."
@@ -103,6 +160,6 @@ class AnomalyDetector:
 
         return anomaly_score, risk_level, description
 
-# Singleton instances
+# Singleton instances (global scope init is fast now)
 phishing_engine = PhishingDetector()
 anomaly_engine = AnomalyDetector()
