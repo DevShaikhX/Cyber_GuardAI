@@ -5,8 +5,20 @@
             "destination": "/api/index.py"
         },
         {
-            "source": "/((?!api/|assets/|vite.svg|robots.txt).*)",
-            "destination": "/index.html"
+            "source": "/assets/(.*)",
+            "destination": "/dist/assets/$1"
+        },
+        {
+            "source": "/vite.svg",
+            "destination": "/dist/vite.svg"
+        },
+        {
+            "source": "/robots.txt",
+            "destination": "/dist/robots.txt"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/dist/index.html"
         }
     ],
     "functions": {
