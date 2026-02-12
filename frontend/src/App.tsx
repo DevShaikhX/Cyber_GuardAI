@@ -41,7 +41,9 @@ ChartJS.register(
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  // ... rest of state stays the same
   const [emailData, setEmailData] = useState<EmailData>({ 
     sender_email: '', 
     recipient_email: '', 
@@ -64,6 +66,7 @@ const App = () => {
     fetchHistory();
   }, []);
 
+  // ... fetchHistory, submitEmail, submitNetwork stay the same
   const fetchHistory = async () => {
     try {
       const res = await axios.get('/api/get-results');
@@ -104,9 +107,23 @@ const App = () => {
     }
   };
 
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
+
   return (
     <div className="dashboard-container">
-      <div className="sidebar">
+      {/* Mobile Header */}
+      <header className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Shield size={24} color="var(--accent-primary)" />
+          <h3 style={{ margin: 0 }}>CyberGuard</h3>
+        </div>
+        <button className="menu-toggle" onClick={toggleMenu}>
+          {isMenuOpen ? <Activity size={24} /> : <LayoutDashboard size={24} />}
+        </button>
+      </header>
+
+      <div className={`sidebar ${isMenuOpen ? 'open' : ''}`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Shield size={32} color="var(--accent-primary)" />
           <h2 style={{ margin: 0 }}>CyberGuard</h2>
@@ -116,21 +133,21 @@ const App = () => {
           <button 
             className={`btn ${activeTab === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`} 
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px' }}
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => { setActiveTab('dashboard'); closeMenu(); }}
           >
             <LayoutDashboard size={18} /> Dashboard
           </button>
           <button 
             className={`btn ${activeTab === 'analyze' ? 'btn-primary' : 'btn-secondary'}`} 
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px' }}
-            onClick={() => setActiveTab('analyze')}
+            onClick={() => { setActiveTab('analyze'); closeMenu(); }}
           >
             <Shield size={18} /> Analyze Threats
           </button>
           <button 
             className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}`} 
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px' }}
-            onClick={() => setActiveTab('history')}
+            onClick={() => { setActiveTab('history'); closeMenu(); }}
           >
             <History size={18} /> Audit Log
           </button>
