@@ -22,13 +22,12 @@ class PhishingDetector:
                 from transformers import pipeline
         except ImportError:
             pipeline = None
-            print("Warning: Could not import transformers.")
+            pass
 
         if pipeline:
             try:
                 self._classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
-            except Exception as e:
-                print(f"Warning: Could not load transformer model: {e}")
+            except Exception:
                 self._classifier = None
         
         self._initialized = True
@@ -104,11 +103,9 @@ class AnomalyDetector:
             # Pre-train with some dummy data to avoid errors if first call is too small
             dummy_data = np.random.rand(10, 4) # source_port, dest_port, packet_count, protocol_encoded
             self._model.fit(dummy_data)
-        except ImportError as e:
-            print(f"Warning: Could not import ML libraries for AnomalyDetector: {e}")
+        except ImportError:
             self._model = None
-        except Exception as e:
-            print(f"Warning: Could not initialize AnomalyDetector model: {e}")
+        except Exception:
             self._model = None
             
         self._initialized = True
@@ -135,8 +132,7 @@ class AnomalyDetector:
                 # We want higher score for higher anomaly
                 anomaly_score = (1 - (prediction + 0.5)) * 100
                 anomaly_score = max(0, min(100, anomaly_score))
-            except Exception as e:
-                print(f"Error during anomaly detection: {e}")
+            except Exception:
                 # Fallbck logic below
                 pass
         
