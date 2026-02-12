@@ -2,12 +2,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "api/index.py"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/frontend/dist/$1",
-            "continue": true
+            "destination": "/api/index.py"
         },
         {
             "source": "/(.*)",

@@ -11,10 +11,12 @@ interface NetworkFormProps {
 
 const NetworkForm: React.FC<NetworkFormProps> = ({ networkData, setNetworkData, onSubmit, loading }) => {
   return (
-    <div className="glass-card">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-        <Activity className="text-secondary" />
-        <h2>Network Anomaly Detection</h2>
+    <div className="glass-card animate-fade stagger-1">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
+        <div style={{ padding: '10px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px' }}>
+          <Activity size={20} color="var(--accent-secondary)" />
+        </div>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Traffic Profiling</h2>
       </div>
       <form onSubmit={onSubmit}>
         <input 

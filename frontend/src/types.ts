@@ -15,6 +15,20 @@ export interface NetworkData {
     packet_count: number;
 }
 
+export interface RansomwareData {
+    process_name: string;
+    file_path: string;
+    file_hash: string;
+    suspicious_activity: string;
+}
+
+export interface DdosData {
+    target_ip: string;
+    traffic_volume: number;
+    protocol: string;
+    attack_type: string;
+}
+
 export interface Prediction {
     phishing_probability?: number;
     anomaly_score?: number;
@@ -25,8 +39,8 @@ export interface Prediction {
 }
 
 export interface HistoryItem {
-    type: 'email' | 'network';
-    input_data: any; // Can be EmailData or NetworkData
+    type: 'email' | 'network' | 'ransomware' | 'ddos';
+    input_data: any;
     prediction: Prediction;
     timestamp: string;
 }

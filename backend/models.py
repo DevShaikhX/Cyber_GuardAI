@@ -42,6 +42,30 @@ class AnomalyPrediction(BaseModel):
     risk_level: str
     suspicious_activity_description: str
 
+# Ransomware Models
+class RansomwareInput(BaseModel):
+    process_name: str
+    file_path: str
+    file_hash: str
+    suspicious_activity: str
+
+class RansomwarePrediction(BaseModel):
+    risk_level: str
+    explanation: str
+    flagged_sections: List[str]
+
+# DDoS Models
+class DDoSInput(BaseModel):
+    target_ip: str
+    traffic_volume: int
+    protocol: str
+    attack_type: str
+
+class DDoSPrediction(BaseModel):
+    risk_level: str
+    explanation: str
+    flagged_sections: List[str]
+
 # Database Models (shared)
 class ResultEntry(BaseModel):
     id: Optional[int] = None

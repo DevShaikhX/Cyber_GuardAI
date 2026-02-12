@@ -1,5 +1,5 @@
-import React from 'react';
 import { HistoryItem } from '../types';
+import { Mail, Activity, ShieldAlert, Zap } from 'lucide-react';
 
 interface AuditLogProps {
   history: HistoryItem[];
@@ -28,10 +28,25 @@ const AuditLog: React.FC<AuditLogProps> = ({ history }) => {
               return (
                 <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem' }}>
-                    <span style={{ fontWeight: 'bold', fontSize: '0.75rem' }}>{h.type.toUpperCase()}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ 
+                        padding: '6px', 
+                        borderRadius: '6px', 
+                        background: h.type === 'email' ? 'rgba(99, 102, 241, 0.1)' : 
+                                   h.type === 'network' ? 'rgba(139, 92, 246, 0.1)' :
+                                   h.type === 'ransomware' ? 'rgba(236, 72, 153, 0.1)' : 'rgba(139, 92, 246, 0.1)'
+                      }}>
+                        {h.type === 'email' ? <Mail size={14} color="var(--accent-primary)" /> : 
+                         h.type === 'network' ? <Activity size={14} color="var(--accent-secondary)" /> :
+                         h.type === 'ransomware' ? <ShieldAlert size={14} color="#ec4899" /> : <Zap size={14} color="#8b5cf6" />}
+                      </div>
+                      <span style={{ fontWeight: 'bold', fontSize: '0.75rem' }}>{h.type.toUpperCase()}</span>
+                    </div>
                   </td>
                   <td style={{ padding: '1rem', fontSize: '0.875rem', opacity: 0.8 }}>
-                    {h.type === 'email' ? h.input_data.sender_email : `${h.input_data.source_ip} -> ${h.input_data.destination_ip}`}
+                    {h.type === 'email' ? h.input_data.sender_email : 
+                     h.type === 'network' ? `${h.input_data.source_ip} -> ${h.input_data.destination_ip}` :
+                     h.type === 'ransomware' ? h.input_data.process_name : h.input_data.target_ip}
                   </td>
                   <td style={{ padding: '1rem', fontFamily: 'monospace' }}>{formattedScore}%</td>
                   <td style={{ padding: '1rem' }}>

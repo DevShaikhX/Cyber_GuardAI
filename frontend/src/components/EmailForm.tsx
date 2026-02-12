@@ -11,10 +11,12 @@ interface EmailFormProps {
 
 const EmailForm: React.FC<EmailFormProps> = ({ emailData, setEmailData, onSubmit, loading }) => {
   return (
-    <div className="glass-card">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-        <Mail className="text-primary" />
-        <h2>Email Phishing Detection</h2>
+    <div className="glass-card animate-fade stagger-1">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
+        <div style={{ padding: '10px', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '12px' }}>
+          <Mail size={20} color="var(--accent-primary)" />
+        </div>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Phishing Analysis</h2>
       </div>
       <form onSubmit={onSubmit}>
         <input 
