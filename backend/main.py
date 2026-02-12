@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import datetime
+from typing import List
 
 from .database import get_db, DetectionResult
 from .models import (
@@ -150,7 +151,7 @@ def submit_ddos(data: DDoSInput, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/get-results")
+@api_router.get("/get-results", response_model=List[ResultEntry])
 def get_results(limit: int = 20, db: Session = Depends(get_db)):
     results = db.query(DetectionResult).order_by(DetectionResult.timestamp.desc()).limit(limit).all()
     return results

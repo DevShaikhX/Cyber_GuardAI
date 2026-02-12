@@ -73,3 +73,6 @@ class ResultEntry(BaseModel):
     timestamp: datetime
     input_data: dict
     prediction: dict
+
+    class Config:
+        from_attributes = True
