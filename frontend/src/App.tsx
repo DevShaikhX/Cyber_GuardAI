@@ -88,7 +88,7 @@ const App = () => {
       const res = await axios.get('/api/get-results');
       setHistory(res.data);
     } catch (err) {
-      // console.error("Failed to fetch history", err);
+      console.error("Failed to fetch history", err);
     }
   };
 

@@ -12,12 +12,6 @@ from .models import (
     ResultEntry
 )
 from .ai_engine import phishing_engine, anomaly_engine
-import logging
-
-# Aggressively silence logging
-logging.basicConfig(level=logging.CRITICAL)
-logging.getLogger("uvicorn").setLevel(logging.CRITICAL)
-logging.getLogger("fastapi").setLevel(logging.CRITICAL)
 
 app = FastAPI(title="CyberGuard AI API")
 api_router = APIRouter()
