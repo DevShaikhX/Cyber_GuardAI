@@ -3,7 +3,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import datetime
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./cyberguard.db"
+import os
+
+# Use /tmp for SQLite when running on Vercel (ephemeral writeable storage)
+DATABASE_FILENAME = "cyberguard.db"
+if os.environ.get("VERCEL"):
+    SQLALCHEMY_DATABASE_URL = f"sqlite:////tmp/{DATABASE_FILENAME}"
+else:
+    SQLALCHEMY_DATABASE_URL = f"sqlite:///./{DATABASE_FILENAME}"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
