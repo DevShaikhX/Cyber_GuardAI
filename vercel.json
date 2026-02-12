@@ -6,7 +6,8 @@
         },
         {
             "source": "/(.*)",
-            "destination": "/frontend/dist/$1"
+            "destination": "/frontend/dist/$1",
+            "continue": true
         },
         {
             "source": "/(.*)",
