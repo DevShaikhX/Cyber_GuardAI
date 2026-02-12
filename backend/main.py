@@ -13,6 +13,11 @@ from .models import (
     ResultEntry
 )
 from .ai_engine import phishing_engine, anomaly_engine
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="CyberGuard AI API")
 api_router = APIRouter()
@@ -153,8 +158,16 @@ def submit_ddos(data: DDoSInput, db: Session = Depends(get_db)):
 
 @api_router.get("/get-results", response_model=List[ResultEntry])
 def get_results(limit: int = 20, db: Session = Depends(get_db)):
-    results = db.query(DetectionResult).order_by(DetectionResult.timestamp.desc()).limit(limit).all()
-    return results
+    try:
+        results = db.query(DetectionResult).order_by(DetectionResult.timestamp.desc()).limit(limit).all()
+        # Explicitly convert to dict to avoid any lazy loading or serialization issues with SQLAlchemy objects
+        serialized_results = []
+        for r in results:
+            serialized_results.append(ResultEntry.from_orm(r))
+        return serialized_results
+    except Exception as e:
+        logger.error(f"Error fetching results: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch results")
 
 @api_router.get("/health")
 def health_check():
