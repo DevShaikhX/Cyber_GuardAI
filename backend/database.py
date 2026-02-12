@@ -7,7 +7,8 @@ import os
 
 # Use /tmp for SQLite when running on Vercel (ephemeral writeable storage)
 DATABASE_FILENAME = "cyberguard.db"
-if os.environ.get("VERCEL"):
+is_vercel = os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV") or os.environ.get("VERCEL_REGION")
+if is_vercel:
     SQLALCHEMY_DATABASE_URL = f"sqlite:////tmp/{DATABASE_FILENAME}"
 else:
     SQLALCHEMY_DATABASE_URL = f"sqlite:///./{DATABASE_FILENAME}"
